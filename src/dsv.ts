@@ -24,11 +24,22 @@ function resolve(options: ParseOptions): Resolved {
   };
 }
 
-/** Split one line into fields, honouring double-quoted fields and "" escapes. */
-function splitLine(line: string, delimiter: string): string[] {
+/**
+ * Split one line into fields, honouring double-quoted fields and "" escapes.
+ * When `trim` is set, surrounding whitespace is stripped from fields that were
+ * not quoted; a quoted field keeps its padding.
+ */
+function splitLine(line: string, delimiter: string, trim: boolean): string[] {
   const fields: string[] = [];
   let field = "";
   let quoted = false;
+  let wasQuoted = false;
+
+  const push = (): void => {
+    fields.push(trim && !wasQuoted ? field.trim() : field);
+    field = "";
+    wasQuoted = false;
+  };
 
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i];
@@ -47,17 +58,17 @@ function splitLine(line: string, delimiter: string): string[] {
     }
     if (ch === '"' && field === "") {
       quoted = true;
+      wasQuoted = true;
       continue;
     }
     if (line.startsWith(delimiter, i)) {
-      fields.push(field);
-      field = "";
+      push();
       i += delimiter.length - 1;
       continue;
     }
     field += ch;
   }
-  fields.push(field);
+  push();
   return fields;
 }
 
@@ -68,7 +79,7 @@ export function parse(input: string, options: ParseOptions = {}): Row[] {
   const records: string[][] = [];
   for (const line of lines) {
     if (opts.skipEmptyLines && line.length === 0) continue;
-    records.push(splitLine(line, opts.delimiter));
+    records.push(splitLine(line, opts.delimiter, opts.trim));
   }
 
   if (!opts.headers) return records;
