@@ -40,6 +40,24 @@ describe("parse", () => {
   test("returns no rows for a header with no records", () => {
     expect(parse("a,b", { headers: true })).toEqual([]);
   });
+
+  test("trims surrounding whitespace from unquoted fields", () => {
+    expect(parse("a , b ", { trim: true })).toEqual([["a", "b"]]);
+  });
+
+  test("leaves whitespace alone without trim", () => {
+    expect(parse("a , b ")).toEqual([["a ", " b "]]);
+  });
+
+  test("keeps padding inside a quoted field when trimming", () => {
+    expect(parse(' x ,"  b  ", y ', { trim: true })).toEqual([["x", "  b  ", "y"]]);
+  });
+
+  test("trims header names as well as records", () => {
+    const rows = parse(" name , age \n ada , 36 ", { headers: true, trim: true });
+    expect(rows).toEqual([{ name: "ada", age: "36" }]);
+    expect((rows[0] as Record<string, string>).name).toBe("ada");
+  });
 });
 
 describe("stringify", () => {
