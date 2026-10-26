@@ -11,6 +11,12 @@ closes the issue. Work that only investigates uses `Refs #12` instead.
 
 ## Issues
 
+Every issue carries both English and 繁體中文, in that order, separated by a
+`---` line. Both halves say the same thing: the same problem, the same proposed
+direction, the same acceptance criteria. A reader of either language gets the
+whole issue, never a summary of the other half. Code, identifiers, paths and
+commands are not translated.
+
 An issue states what is observably wrong, the direction a fix would take, and
 the acceptance criteria that decide when it is done.
 
